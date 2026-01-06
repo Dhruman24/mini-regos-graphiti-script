@@ -1,1 +1,0 @@
-# mini-regos-graphiti-script
