@@ -64,3 +64,17 @@ async def ingest_chunks(req: IngestRequest, x_api_key: str | None = Header(defau
 async def finalize(x_api_key: str | None = Header(default=None)):
     require_key(x_api_key)
     return {"status": "finalized"}
+
+@app.post("/query")
+def query_graph(question: str, doc_id: str | None = None):
+    cypher = """
+    MATCH (d:Document)-[:MENTIONS]->(e)
+    WHERE d.doc_id = $doc_id
+    RETURN e.name, labels(e)
+    LIMIT 10
+    """
+    result = graph.run(cypher, doc_id=doc_id)
+    return {
+        "question": question,
+        "results": [r.data() for r in result]
+    }
