@@ -1,0 +1,336 @@
+{
+  "name": "Mini Regos KG",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -48
+      ],
+      "id": "84938197-0262-4be9-86c9-ff3893054514",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "216b6957-f600-4907-b65b-0f19aec2fd94",
+              "name": "OPENWEBUI_BASE",
+              "value": "https://workbench.apas.ai",
+              "type": "string"
+            },
+            {
+              "id": "2751bf05-4cdd-4544-ae1d-94d22885c8bc",
+              "name": "KNOWLEDGE_ID",
+              "value": "db76f965-db19-45e1-b953-1ea8dda53227",
+              "type": "string"
+            },
+            {
+              "id": "4c29d82d-ca99-4996-9bee-a72fb5e9e24e",
+              "name": "GRAPHITI_BASE",
+              "value": "https://mini-regos-graphiti-script.onrender.com",
+              "type": "string"
+            },
+            {
+              "id": "43dc49e8-98c9-446c-bb46-007603f667fc",
+              "name": "DOC_ID",
+              "value": "ch24",
+              "type": "string"
+            },
+            {
+              "id": "4d5647b4-9c9f-41de-b256-5076262c4886",
+              "name": "DOC_NAME",
+              "value": "Chapter 24",
+              "type": "string"
+            },
+            {
+              "id": "6ed153d5-ede2-4e4e-b702-963428c22c3a",
+              "name": "DOC_VERSION",
+              "value": "v2026-01-05",
+              "type": "string"
+            },
+            {
+              "id": "2ff2144d-5369-4699-a135-5f1e5fd831a3",
+              "name": "JURISDICTION",
+              "value": "Miami-Dade County",
+              "type": "string"
+            },
+            {
+              "id": "cb6ce627-8e52-4758-acd5-103d325b4f69",
+              "name": "BATCH_SIZE",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "id": "d6133945-9282-4ed6-a909-732129c208b6",
+              "name": "GRAPHITI_API_KEY",
+              "value": "uhveurfyveuyrvfuyvkuergfuyerbfueyrbfuygerugfudybub",
+              "type": "string"
+            },
+            {
+              "id": "f7477814-9a08-4989-bfcb-0c6658d72774",
+              "name": "OPENWEBUI_JWT",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUzODkxYTJlLTJhYzctNDQxOS05NDEyLTVlMGY2MGE5NjhkOCIsImV4cCI6MTc2OTc3ODk4OSwianRpIjoiYjEwYTJkODctZTRkMy00NjE4LWE4ZTgtNmFkNmQ2NTdlMjY3In0.AtNciD5zGpMxyNvTch_jj4wKOZq-d9rT1nDtZNkGm-Y",
+              "type": "string"
+            },
+            {
+              "id": "a4415d6e-d132-4968-a30e-664089016a7f",
+              "name": "CHUNK_SIZE",
+              "value": 700,
+              "type": "number"
+            },
+            {
+              "id": "dd997618-d42f-4221-a92a-e799988b366b",
+              "name": "CHUNK_OVERLAP",
+              "value": 150,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        -48
+      ],
+      "id": "537f4848-feca-417c-981e-f0926f925708",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull constants from Edit Fields (change the node name if yours differs)\nconst constants = (() => {\n  try {\n    return $items(\"Edit Fields\")[0].json;\n  } catch (e) {\n    return {};\n  }\n})();\n\n// Each incoming item is a page response: { body: { items: [...] , total: ... }, ... }\nconst pages = $input.all().map(i => i.json);\n\n// Flatten all files from all pages\nconst files = pages.flatMap(p => (p.body?.items ?? []));\n\n// (Optional) filter out empty pages\nconst nonEmptyFiles = files.filter(f => f && f.id);\n\n// Return one n8n item per file\nreturn nonEmptyFiles.map(f => ({\n  json: {\n    // constants\n    GRAPHITI_BASE: constants.GRAPHITI_BASE,\n    GRAPHITI_API_KEY: constants.GRAPHITI_API_KEY,\n    OPENWEBUI_BASE: constants.OPENWEBUI_BASE,\n    OPENWEBUI_JWT: constants.OPENWEBUI_JWT,\n    KNOWLEDGE_ID: constants.KNOWLEDGE_ID,\n    DOC_ID: constants.DOC_ID,\n    DOC_NAME: constants.DOC_NAME,\n    DOC_VERSION: constants.DOC_VERSION,\n    JURISDICTION: constants.JURISDICTION,\n\n    // per-file\n    file_id: f.id,\n    filename: f.filename,\n    path: f.path,\n    section_text: f.data?.content ?? \"\",\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -64
+      ],
+      "id": "fafa5b80-7fe7-4b2e-a581-f2e14c7358c8",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.GRAPHITI_BASE + \"/ingest-chunks\"  }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "={{ $json.GRAPHITI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "doc",
+              "value": "={{ {  doc_id: $json.DOC_ID,  doc_name: $json.DOC_NAME,  version: $json.DOC_VERSION,  jurisdiction: $json.JURISDICTION,  knowledge_id: $json.KNOWLEDGE_ID} }}"
+            },
+            {
+              "name": "chunks",
+              "value": "={{ [  {    chunk_id: $json.file_id,    text: $json.section_text,    source_file_id: $json.file_id,    source_file_name: $json.filename,    section_label: $json.filename,    heading: \"\"  }] }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 1200000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        -64
+      ],
+      "id": "9016ee43-6b70-499e-8f17-c62904065314",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pageSize = $json.BATCH_SIZE || 25;\nconst total = $json.TOTAL_FILES || 144; // set 144 here or fetch it once (see note below)\nconst pages = Math.ceil(total / pageSize);\n\nreturn Array.from({ length: pages }, (_, i) => ({\n  json: { ...$json, page: i + 1, page_size: pageSize }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -48
+      ],
+      "id": "94903acf-db7d-4172-a32c-248d5dc6ee1f",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "batchSize": 25,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        320,
+        -48
+      ],
+      "id": "058959d7-2891-4816-96f4-942fcd2e0ae6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.OPENWEBUI_BASE + '/api/v1/knowledge/' + $json.KNOWLEDGE_ID + '/files' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "page_size",
+              "value": "={{ $json.page_size }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $json.page }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.OPENWEBUI_JWT }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "fd233a75-1109-4d43-a84a-25aee417d74d",
+      "name": "HTTP Request2",
+      "alwaysOutputData": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "042980f5-cccc-4d79-a8b7-89bce34f4337",
+  "meta": {
+    "instanceId": "096c3f9a8f1f04aaf2000e332948ea609dc70332029ff390eb239ec77b6f902a"
+  },
+  "id": "CuVe4BUu89kXCgDs",
+  "tags": []
+}
