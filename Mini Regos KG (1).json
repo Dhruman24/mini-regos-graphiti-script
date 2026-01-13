@@ -31,7 +31,7 @@
             {
               "id": "4c29d82d-ca99-4996-9bee-a72fb5e9e24e",
               "name": "GRAPHITI_BASE",
-              "value": "https://mini-regos-graphiti-script.onrender.com",
+              "value": "http://165.227.223.88:8000",
               "type": "string"
             },
             {
@@ -108,8 +108,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        656,
-        -64
+        560,
+        -48
       ],
       "id": "fafa5b80-7fe7-4b2e-a581-f2e14c7358c8",
       "name": "Code"
@@ -159,14 +159,14 @@
               "responseFormat": "json"
             }
           },
-          "timeout": 1200000
+          "timeout": 120000000
         }
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        816,
-        -64
+        752,
+        -48
       ],
       "id": "9016ee43-6b70-499e-8f17-c62904065314",
       "name": "HTTP Request1"
@@ -183,20 +183,6 @@
       ],
       "id": "94903acf-db7d-4172-a32c-248d5dc6ee1f",
       "name": "Code1"
-    },
-    {
-      "parameters": {
-        "batchSize": 25,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        320,
-        -48
-      ],
-      "id": "058959d7-2891-4816-96f4-942fcd2e0ae6",
-      "name": "Loop Over Items"
     },
     {
       "parameters": {
@@ -239,12 +225,26 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        496,
-        0
+        336,
+        -48
       ],
       "id": "fd233a75-1109-4d43-a84a-25aee417d74d",
       "name": "HTTP Request2",
       "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "batchSize": 25,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        736,
+        128
+      ],
+      "id": "bd83497f-5a2a-4d96-86fe-f41d733d1afd",
+      "name": "Loop Over Items1"
     }
   ],
   "pinData": {},
@@ -286,24 +286,6 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items": {
-      "main": [
-        [
-          {
-            "node": "Code",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "HTTP Request2",
             "type": "main",
             "index": 0
@@ -315,11 +297,16 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Code",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
       ]
     }
   },
@@ -327,7 +314,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "042980f5-cccc-4d79-a8b7-89bce34f4337",
+  "versionId": "15e48195-c7d4-4ef4-8710-ff336508c68d",
   "meta": {
     "instanceId": "096c3f9a8f1f04aaf2000e332948ea609dc70332029ff390eb239ec77b6f902a"
   },
